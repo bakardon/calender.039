@@ -1,132 +1,106 @@
 # calender.039
+link for onedrive since the other one has issues.....
+https://1drv.ms/w/s!Aq_l1Y9nam8ehkCKR2xaaT3IU9k6?e=ETqMVi
 
-#include<iostream>
-using namespace std;
-int dayNumber(int day, int month, int year)
-{
-    static int A[] = { 0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4 };
-    year -= month < 3;
-    return ( year + year/4 - year/100 + year/400 + A[month-1] + day) % 7;
-}
-string getMonthName(int monthNumber) 
-{
-    string M[] = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
-    return M[monthNumber - 1];
-}
-int numberOfDays(int monthNumber, int year)
-{
-    switch(monthNumber)
-    {
-        case 1:
-        case 3:
-        case 5:
-        case 7:
-        case 8:
-        case 10:
-        case 12: return 31;
-        break;
-        case 2:
-            if (year % 400 == 0 || (year % 4 == 0 && year %100 != 0))
-                return 29;
-            else
-                return 28;
-        break;
-        case 4:
-        case 6:
-        case 9:
-        case 11: return 30;
-        break;
-        default: return 0;
-    }
-}
-void printCalendar(int year, string reminders[][31])
-{
-    cout<<"\t\t\t Calendar - Year "<<year;
-    int days;
-    int current = dayNumber (1, 1, year);
-    for (int i = 1; i <= 12; i++)
-    {
-        days = numberOfDays (i, year);
-        cout<<endl<<"\t\t ----X----"<<getMonthName (i).c_str()<<"----X---- \t\t"<<endl;
-        cout<<" Sun  Mon  Tue   Wed    Thu    Fri    Sat \n";
-        int k;
-        for (k = 0; k < current; k++)
-            cout<<"\t";
-        for (int j = 1; j <= days; j++)
-        {
-            printf("%3d ", j);
-            if (reminders[i-1][j-1] != "")
-                cout << " (" << reminders[i-1][j-1] << ") ";
 
-            if (++k > 6)
-            {
-                k = 0;
-                cout<<endl;
-            }
-        }
-        if (k)
-            cout<<endl;
-        current = k;
-    }
-    return;
+#include <iostream>
+#include <string>
+class Calendar {
+public:
+    Calendar(int year) : m_year(year) {}
+    void printCalendar();
+    void addReminder(int day, const std::string& reminder);
+    void clearReminders();
+private:
+    int m_year;
+    std::string m_reminders[12][31];
 };
-
-int main()
-{
-    int year;
-    cout<<"Enter the year\n";
-    cin>>year;
-    string reminders[12][31];
-    for (int i = 0; i < 12; i++)
-    {
-        for (int j = 0; j < 31; j++)
-        {
-            reminders[i][j] = "";
+void Calendar::printCalendar() {
+    std::string months[] = {"January", "February", "March", "April", "May", "June", 
+                            "July", "August", "September", "October", "November", "December"};
+    int daysInMonth[] = {31, m_year % 4 == 0 ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    int startingDay = 0;
+    std::cout << "Calendar for year " << m_year << std::endl;
+    for (int month = 0; month < 12; month++) {
+        std::cout << std::endl << months[month] << std::endl;
+        std::cout << "Sun Mon Tue Wed Thu Fri Sat" << std::endl;
+        for (int i = 0; i < startingDay; i++) {
+            std::cout << "    ";
+        }
+        for (int day = 1; day <= daysInMonth[month]; day++) {
+            if ((day + startingDay - 1) % 7 == 0 && day != 1) {
+                std::cout << std::endl;
+            }
+            std::cout << day;
+            if (!m_reminders[month][day-1].empty()) {
+                std::cout << " [" << m_reminders[month][day-1] << "]";
+            }
+            if (day < 10) {
+                std::cout << "   ";
+            }
+            else {
+                std::cout << "  ";
+            }
+            startingDay = (startingDay + 1) % 7;
         }
     }
-
-    int choice = 0;
-    while (choice != 4) 
-    {
-        cout << "\nOptions:\n";
-        cout << "1. Add reminder\n";
-        cout << "2. Print calendar\n";
-        cout << "3. Clear reminders\n";
-        cout << "4. Quit\n";
-        cout << "Enter choice: ";
-        cin >> choice;
-   switch(choice)
-   {
-      case 1:
-         int month, day;
-         cout << "Enter month (1-12) and day (1-31): ";
-         cin >> month >> day;
-         cout << "Enter reminder for month " << month << " day " << day << ": ";
-         cin >> reminders[month-1][day-1];
-         break;
-
-      case 2:
-         printCalendar(year, reminders);
-         break;
-
-      case 3:
-         for (int i = 0; i < 12; i++) 
-         {
-            for (int j = 0; j < 31; j++) 
-            {
-               reminders[i][j] = "";
-            }
-         }
-         cout << "Reminders cleared.\n";
-         break;
-
-      case 4:
-         cout << "Goodbye!\n";
-         break;
-      default:
-         cout << "Invalid choice. Please try again.\n";
-         break;
-   }
+    std::cout << std::endl;
 }
-return 0;
+
+void Calendar::addReminder(int day, const std::string& reminder) {
+    int month, dayOfMonth;
+    month = day / 100 - 1;
+    dayOfMonth = day % 100 - 1;
+    m_reminders[month][dayOfMonth] = reminder;
 }
+
+void Calendar::clearReminders() {
+    for (int month = 0; month < 12; month++) {
+        for (int day = 0; day < 31; day++) {
+            m_reminders[month][day] = "";
+        }
+    }
+}
+int main() {
+    int year;
+    std::cout << "Enter year: ";
+    std::cin >> year;
+    Calendar calendar(year);
+    std::string reminder;
+    char choice;
+    while (true) {
+        std::cout << std::endl;
+        std::cout << "Please select an option:" << std::endl;
+        std::cout << "1. Print Calendar" << std::endl;
+        std::cout << "2. Add Reminder" << std::endl;
+        std::cout << "3. Clear Reminders" << std::endl;
+        std::cout << "4. Quit" << std::endl;
+        std::cin >> choice;
+        switch (choice) {
+            case '1':
+                calendar.printCalendar();
+                break;
+            case '2':
+                int day;
+                std::cout << "Enter day : ";
+                std::cin >> day;
+                std::cout << "Enter reminder : ";
+                std::cin.ignore();
+                std::getline(std::cin, reminder);
+                calendar.addReminder(day, reminder);
+                std::cout << "Reminder added successfully." << std::endl;
+                break;
+            case '3':
+                calendar.clearReminders();
+                std::cout << "All reminders cleared." << std::endl;
+                break;
+            case '4':
+                std::cout << "Thank you for using Calendar." << std::endl;
+                return 0;
+            default:
+                std::cout << "Invalid input. Please try again." << std::endl;
+        }
+    }
+    return 0;
+}
+
